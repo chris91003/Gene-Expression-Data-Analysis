@@ -1,0 +1,343 @@
+---
+title: "ChrisHw2"
+output:
+  word_document: default
+  html_document: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+library(marray)
+library(limma)
+
+#1
+dir.path <- "C:/Users/cdima/OneDrive/Desktop/Gene Expression Data Analysis Visualization/Hw2"
+data <- read.GenePix(path=dir.path,name.Gf = "F532 Median",name.Gb ="B532 Median", 
+                       name.Rf = "F635 Median", name.Rb = "B635 Median",name.W ="Flags")
+```
+
+
+```{r}
+#2
+par(mar=c(1, 1, 1, 1))
+library(marray)
+library(limma)
+
+#first set
+mnorm <- maNorm(data[,1], norm="median")
+mnorm_loess <- maNorm(data[,1], norm="loess")
+mnorm_printtip <- maNorm(data[,1], norm="printTipLoess")
+reg1 <- maNorm(data[,1], norm="none")
+
+par(mfrow=c(4,1))
+maPlot(mnorm, lines.func = NULL, legend.func = NULL) 
+maPlot(mnorm_loess, lines.func = NULL, legend.func = NULL) 
+maPlot(mnorm_printtip, lines.func = NULL, legend.func = NULL) 
+maPlot(reg1, lines.func = NULL, legend.func = NULL) 
+
+
+```
+
+```{r}
+par(mar=c(1, 1, 1, 1))
+
+#second set
+mnorm2 <- maNorm(data[,2], norm="median")
+mnorm_loess2 <- maNorm(data[,2], norm="loess")
+mnorm_printtip2 <- maNorm(data[,2], norm="printTipLoess")
+reg2 <- maNorm(data[,2], norm="none")
+
+par(mfrow=c(4,1))
+maPlot(mnorm2, lines.func = NULL, legend.func = NULL) 
+maPlot(mnorm_loess2, lines.func = NULL, legend.func = NULL) 
+maPlot(mnorm_printtip2, lines.func = NULL, legend.func = NULL)
+maPlot(reg1, lines.func = NULL, legend.func = NULL) 
+
+```
+
+```{r}
+#Third set
+
+par(mar=c(1, 1, 1, 1))
+
+mnorm3 <- maNorm(data[,3], norm="median")
+mnorm_loess3 <- maNorm(data[,3], norm="loess")
+mnorm_printtip3 <- maNorm(data[,3], norm="printTipLoess")
+reg3 <- maNorm(data[,3], norm="none")
+
+
+par(mfrow=c(4,1))
+maPlot(mnorm3, lines.func = NULL, legend.func = NULL) 
+maPlot(mnorm_loess3, lines.func = NULL, legend.func = NULL) 
+maPlot(mnorm_printtip3, lines.func = NULL, legend.func = NULL)
+maPlot(reg3, lines.func = NULL, legend.func = NULL) 
+```
+
+
+```{r}
+#4th set
+
+par(mar=c(1, 1, 1, 1))
+
+mnorm4 <- maNorm(data[,4], norm="median")
+mnorm_loess4 <- maNorm(data[,4], norm="loess")
+mnorm_printtip4 <- maNorm(data[,4], norm="printTipLoess")
+reg4 <- maNorm(data[,4], norm="none")
+
+par(mfrow=c(4,1))
+maPlot(mnorm4, lines.func = NULL, legend.func = NULL) 
+maPlot(mnorm_loess4, lines.func = NULL, legend.func = NULL) 
+maPlot(mnorm_printtip4, lines.func = NULL, legend.func = NULL)
+maPlot(reg4, lines.func = NULL, legend.func = NULL) 
+```
+
+
+
+```{r}
+#3
+
+df <- data.frame(maGnames(reg4)@maLabels, reg4@maM)
+names(df)[2] <- "Values"
+
+density = density(na.omit(df$Values))
+
+#plot(density, main= "Density Curve")
+plot(density(na.omit(maM(reg4))), main= "Density Curve", xlab = "Log Values", ylim= c(0,1))
+lines(density(na.omit(maM(mnorm4))), col = "yellow") 
+lines(density(na.omit(maM(mnorm_loess4))), col = "green") 
+lines(density(na.omit(maM(mnorm_printtip4))), col = "orange") 
+
+legend(0.2, 1.0, legend=c("Median", "Loess", "LoessTip","Normal"), 
+col=c("yellow", "green", "orange", "black"), lty=1:2, cex=0.8)
+```
+
+```{r}
+#4
+
+#The normalization preferred for this dataset is the loess which seems
+#to be closer centered at 0
+```
+
+
+```{r}
+#5
+#apply(maGb(dat), 1, median)
+
+library(limma)
+library(marray)
+
+back <- maRb(data[ ,1])
+fore <- maRf(data[ ,1])
+subtract <- fore-back
+log2sub <- log2(abs(subtract))
+log2sub_median <- apply(log2sub, 1, median)
+
+back2 <- maRb(data[ ,2])
+fore2 <- maRf(data[ ,2])
+subtract2 <- fore2-back2
+log2sub2 <- log2(abs(subtract2))
+log2sub_median2 <- apply(log2sub2, 1, median)
+
+back3 <- maRb(data[ ,3])
+fore3 <- maRf(data[ ,3])
+subtract3 <- fore3-back3
+log2sub3 <- log2(abs(subtract3))
+log2sub_median3 <- apply(log2sub3, 1, median)
+
+back4 <- maRb(data[ ,4])
+fore4 <- maRf(data[ ,4])
+subtract4 <- fore4-back4
+log2sub4 <- log2(abs(subtract4))
+log2sub_median4 <- apply(log2sub4, 1, median)
+
+#Calculate GLobal Median Normalization
+data_log <- cbind(log2sub_median, log2sub_median2, log2sub_median3, log2sub_median4)
+data_median  <- apply(data_log, 2, median, na.rm = T)
+median_data  <- sweep(data_log, 2, data_median)
+
+median(median_data[ , 1]) 
+median(median_data[ , 2]) 
+median(median_data[ , 3]) 
+median(median_data[ , 4]) 
+```
+
+
+```{r}
+#6
+
+#Correlation for normalized data
+cor_dat<- cor(median_data, use = "complete.obs", method = "spearman") 
+cor_dat
+
+#Get Loess data
+
+loess1 <- maM(mnorm_loess)
+colnames(loess1)[1] <- "Loess1"
+
+loess2 <- maM(mnorm_loess2)
+colnames(loess2)[1] <- "Loess2"
+
+loess3 <- maM(mnorm_loess3)
+colnames(loess3)[1] <- "Loess3"
+
+loess4 <- maM(mnorm_loess4)
+colnames(loess4)[1] <- "Loess4"
+
+#Correlation of Loess Data
+combined= cbind(loess1, loess2, loess3, loess4)
+cor_loess = cor(combined, use = "complete.obs", method= "spearman")
+cor_loess
+
+pairs(cor_dat, main = "Normalization Plot")
+pairs(cor_loess, main = "Loess Normalization Plot")
+```
+
+
+```{r}
+#7
+
+#Change names of subtract values
+
+#Cbind the previous data we did before
+
+com_subtract= cbind(subtract,subtract2, subtract3, subtract4)
+colnames(com_subtract) <- c("Sub1","Sub2", "Sub3", "Sub4")
+
+#Sort The values
+sort_subtract <- apply(com_subtract, 2, sort) 
+
+#Calculate Row Means
+row_avg <- rowMeans(sort_subtract)
+
+#Create new matrix with each row having same value as sorted row mean vectors
+sub1 <- rep(NA, nrow(subtract))
+
+new_sub1 <- rep(NA, nrow(subtract))
+new_sub2 <- rep(NA, nrow(subtract2))
+new_sub3 <- rep(NA, nrow(subtract3))
+new_sub4 <- rep(NA, nrow(subtract4))
+
+
+#Rank Columns indepedently
+rank1 <- rank(subtract, ties.method = c("first"))
+rank2 <- rank(subtract2, ties.method = c("first"))
+rank3 <- rank(subtract3, ties.method = c("first"))
+rank4 <- rank(subtract4, ties.method = c("first"))
+
+new_sub1[rank1] <- row_avg
+new_sub2[rank2] <- row_avg
+new_sub3[rank3] <- row_avg
+new_sub4[rank4] <- row_avg
+
+#Final Matrix
+final_mat <- cbind(new_sub1, new_sub2, new_sub3, new_sub4)
+head(final_mat)
+
+#Check Distributions All seem to have same distribution
+par(mar=c(1, 1, 1, 1))
+par(mfrow=c(4,1))
+hist(final_mat[,1])
+hist(final_mat[,2])
+hist(final_mat[,3])
+hist(final_mat[,4])
+
+
+
+```
+
+
+```{r}
+#8
+
+final_mat[final_mat < 0] <- NA
+
+log_final <- log2(final_mat)
+
+cor_final = cor(log_final, use = "complete.obs", method= "spearman")
+cor_final
+pairs(cor_final, main = "Final Correlation")
+
+
+```
+
+
+```{r}
+#9
+#Of the 4 normalization methods, the most optimal is the loess since it has the best correlation values and seems to normalize the values most closest to 0
+```
+
+
+```{r}
+#10
+# I Ran QT_PCR file separately to generate data but commented it out for r mark down
+
+# f.parse <- function(path=pa,file=fi,out=out.fi) {
+#   d <- read.table(paste(path,file,sep=""),skip=11,sep=",",header=T)
+#   u <- as.character(unique(d$Name))
+#   u <- u[u!=""]; u <- u[!is.na(u)];
+#   ref <- unique(as.character(d$Name[d$Type=="Reference"]))
+#   u <- unique(c(ref,u))
+#   hg <- c("B-Actin","GAPDH","18S")
+#   hg <- toupper(hg)
+#   p <- unique(toupper(as.character(d$Name.1)))
+#   p <- sort(setdiff(p,c("",hg)))
+#   mat <- matrix(0,nrow=length(u),ncol=length(p))
+#   dimnames(mat) <- list(u,p)
+#   for (i in 1:length(u)) {
+#     print(paste(i,": ",u[i],sep=""))
+#     tmp <- d[d$Name %in% u[i],c(1:3,6,9)]
+#     g <- toupper(unique(as.character(tmp$Name.1)))
+#     g <- sort(setdiff(g,c("",hg)))
+#     for (j in 1:length(g)) {
+#       v <- tmp[toupper(as.character(tmp$Name.1)) %in% g[j],5]
+#       v <- v[v!=999]
+#       v <- v[((v/mean(v))<1.5) & ((v/mean(v))>0.67)] #gene j vector
+#       hv3 <- NULL
+#       for (k in 1:length(hg)) { #housekeeping gene vector (each filtered by reps)
+#         hv <- tmp[toupper(as.character(tmp$Name.1)) %in% hg[k],5]
+#         hv <- hv[hv!=999]
+#         hv3 <- c(hv3,hv[((hv/mean(hv))<1.5) & ((hv/mean(hv))>0.67)]) 
+#       }
+#       
+#       # qRT-PCR file formatting and calculation of fold changes (cont)
+#       sv <- mean(as.numeric(v)) - mean(as.numeric(hv3)) #scaled value for gene j
+#       if(i==1) { #reference sample only
+#         mat[u[i],g[j]] <- sv
+#         next
+#       }
+#       mat[u[i],g[j]] <- sv - mat[u[1],g[j]]
+#     }
+#   }
+#   mat[1,][!is.na(mat[1,])] <- 0
+#   fc <- 2^(-1 * mat)
+#   write.table(t(c("Subject",dimnames(mat)[[2]])),paste(path,out,sep=""),quote=F,sep="\t",col.names=F,row.names
+#               =F)
+#   write.table(round(fc,3),paste(path,out,sep=""),quote=F,sep="\t",append=T,col.names=F)
+# }
+# # run function
+# pa <- "C:/Users/cdima/OneDrive/Desktop/Gene Expression Data Analysis Visualization/Hw2/"
+# fi <- "Inflammation_qRT-PCR.csv"
+# out.fi <- "fold_chg_matrix.txt"
+# f.parse(pa,fi,out.fi)
+
+```
+
+
+```{r}
+#11
+pcr <- read.table(file = "fold_matrix.txt", sep = "\t", header=TRUE)
+pcr <- subset(pcr, select = -c(Subject, IL.6))
+pcr_cor <- cor(pcr, method= c("spearman"))
+
+#MX1 and IRF6 We found were most correlated by getting indices
+w <- which(abs(pcr_cor) > 0.97, arr.ind=TRUE)
+plot(pcr$MX1, pcr$IRF7, xlab= "MX1", ylab= "IRF7", main= "Scatter Plot Most Correlated")
+
+cor(pcr$MX1, pcr$IRF7)
+```
+
+
